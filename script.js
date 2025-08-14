@@ -12,20 +12,10 @@ const stateTaxRates = {
   "District of Columbia": 0.06
 };
 
-const taxExemptions = {
-  "grocery": ["Alabama", "Florida", "Texas", "California", "New York", "Pennsylvania"],
-  "clothing": ["Minnesota", "New Jersey", "Pennsylvania"],
-  "prescription": ["All"]
-};
-
-function isTaxExempt(state, itemType) {
-  if (itemType === "prescription") return true;
-  const exemptStates = taxExemptions[itemType] || [];
-  return exemptStates.includes(state);
-}
-
 window.onload = () => {
   const stateSelect = document.getElementById("state");
+
+  // Populate dropdown
   for (const state in stateTaxRates) {
     const option = document.createElement("option");
     option.value = state;
@@ -37,7 +27,7 @@ window.onload = () => {
   fetch("https://ipapi.co/json/")
     .then(response => response.json())
     .then(data => {
-      const userState = data.region;
+      const userState = data.region; // Full state name
       if (stateTaxRates[userState]) {
         stateSelect.value = userState;
       }
@@ -49,7 +39,6 @@ window.onload = () => {
 
 function calculateTax() {
   const state = document.getElementById("state").value;
-  let itemType = document.getElementById("itemType").value;
   const price = parseFloat(document.getElementById("price").value);
   const resultDiv = document.getElementById("result");
 
@@ -58,18 +47,7 @@ function calculateTax() {
     return;
   }
 
-  // Default to general merchandise if no item type is selected
-  if (!itemType) {
-    itemType = "general";
-  }
-
-  let finalPrice;
-  if (isTaxExempt(state, itemType)) {
-    finalPrice = price;
-    resultDiv.textContent = `Final price in ${state} for ${itemType}: $${finalPrice.toFixed(2)} (Tax-Exempt)`;
-  } else {
-    const taxRate = stateTaxRates[state];
-    finalPrice = price * (1 + taxRate);
-    resultDiv.textContent = `Final price in ${state} for ${itemType}: $${finalPrice.toFixed(2)}`;
-  }
+  const taxRate = stateTaxRates[state];
+  const finalPrice = price * (1 + taxRate);
+  resultDiv.textContent = `Final price in ${state}: $${finalPrice.toFixed(2)}`;
 }
