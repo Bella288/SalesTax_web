@@ -1,15 +1,54 @@
 const stateTaxRates = {
-  "Alabama": 0.04, "Alaska": 0.00, "Arizona": 0.056, "Arkansas": 0.065, "California": 0.0725,
-  "Colorado": 0.029, "Connecticut": 0.0635, "Delaware": 0.00, "Florida": 0.06, "Georgia": 0.04,
-  "Hawaii": 0.04, "Idaho": 0.06, "Illinois": 0.0625, "Indiana": 0.07, "Iowa": 0.06,
-  "Kansas": 0.065, "Kentucky": 0.06, "Louisiana": 0.0445, "Maine": 0.055, "Maryland": 0.06,
-  "Massachusetts": 0.0625, "Michigan": 0.06, "Minnesota": 0.06875, "Mississippi": 0.07, "Missouri": 0.04225,
-  "Montana": 0.00, "Nebraska": 0.055, "Nevada": 0.0685, "New Hampshire": 0.00, "New Jersey": 0.06625,
-  "New Mexico": 0.05125, "New York": 0.04, "North Carolina": 0.0475, "North Dakota": 0.05, "Ohio": 0.0575,
-  "Oklahoma": 0.045, "Oregon": 0.00, "Pennsylvania": 0.06, "Rhode Island": 0.07, "South Carolina": 0.06,
-  "South Dakota": 0.045, "Tennessee": 0.07, "Texas": 0.0625, "Utah": 0.0485, "Vermont": 0.06,
-  "Virginia": 0.043, "Washington": 0.065, "West Virginia": 0.06, "Wisconsin": 0.05, "Wyoming": 0.04,
-  "District of Columbia": 0.06
+  "Alabama": 0.04,
+  "Alaska": 0.00,
+  "Arizona": 0.056,
+  "Arkansas": 0.065,
+  "California": 0.0725,
+  "Colorado": 0.029,
+  "Connecticut": 0.0635,
+  "Delaware": 0.00,
+  "Florida": 0.06,
+  "Georgia": 0.04,
+  "Hawaii": 0.04,
+  "Idaho": 0.06,
+  "Illinois": 0.0625,
+  "Indiana": 0.07,
+  "Iowa": 0.06,
+  "Kansas": 0.065,
+  "Kentucky": 0.06,
+  "Louisiana": 0.0445,
+  "Maine": 0.055,
+  "Maryland": 0.06,
+  "Massachusetts": 0.0625,
+  "Michigan": 0.06,
+  "Minnesota": 0.06875,
+  "Mississippi": 0.07,
+  "Missouri": 0.04225,
+  "Montana": 0.00,
+  "Nebraska": 0.055,
+  "Nevada": 0.0685,
+  "New Hampshire": 0.00,
+  "New Jersey": 0.06625,
+  "New Mexico": 0.05125,
+  "New York": 0.04,
+  "North Carolina": 0.0475,
+  "North Dakota": 0.05,
+  "Ohio": 0.0575,
+  "Oklahoma": 0.045,
+  "Oregon": 0.00,
+  "Pennsylvania": 0.06,
+  "Rhode Island": 0.07,
+  "South Carolina": 0.06,
+  "South Dakota": 0.045,
+  "Tennessee": 0.07,
+  "Texas": 0.0625,
+  "Utah": 0.0485,
+  "Vermont": 0.06,
+  "Virginia": 0.043,
+  "Washington": 0.065,
+  "West Virginia": 0.06,
+  "Wisconsin": 0.05,
+  "Wyoming": 0.04
 };
 
 window.onload = () => {
@@ -23,31 +62,51 @@ window.onload = () => {
     stateSelect.appendChild(option);
   }
 
-  // Auto-detect user's state
+  // Auto-detect user's state with fallback
   fetch("https://ipapi.co/json/")
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) throw new Error("Primary API failed");
+      return response.json();
+    })
     .then(data => {
-      const userState = data.region; // Full state name
+      const userState = data.region;
       if (stateTaxRates[userState]) {
         stateSelect.value = userState;
       }
     })
     .catch(error => {
-      console.warn("Could not detect location:", error);
+      console.warn("Primary location detection failed:", error);
+      // Fallback to ipinfo.io using your token
+      fetch("https://ipinfo.io/json?token=98220602a25957")
+        .then(response => {
+          if (!response.ok) throw new Error("Fallback API failed");
+          return response.json();
+        })
+        .then(data => {
+          const userState = data.region;
+          if (stateTaxRates[userState]) {
+            stateSelect.value = userState;
+          }
+        })
+        .catch(fallbackError => {
+          console.warn("Fallback location detection also failed:", fallbackError);
+        });
     });
 };
 
 function calculateTax() {
+  const amount = parseFloat(document.getElementById("amount").value);
   const state = document.getElementById("state").value;
-  const price = parseFloat(document.getElementById("price").value);
-  const resultDiv = document.getElementById("result");
 
-  if (!state || isNaN(price)) {
-    resultDiv.textContent = "Please select a state and enter a valid price.";
+  if (isNaN(amount)) {
+    alert("Please enter a valid amount.");
     return;
   }
 
   const taxRate = stateTaxRates[state];
-  const finalPrice = price * (1 + taxRate);
-  resultDiv.textContent = `Final price in ${state}: $${finalPrice.toFixed(2)}`;
+  const taxAmount = amount * taxRate;
+  const totalAmount = amount + taxAmount;
+
+  document.getElementById("result").textContent =
+    `Tax: $${taxAmount.toFixed(2)} | Total: $${totalAmount.toFixed(2)}`;
 }
