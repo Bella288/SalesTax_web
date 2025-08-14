@@ -95,7 +95,7 @@ window.onload = () => {
 };
 
 function calculateTax() {
-  const amount = parseFloat(document.getElementById("amount").value);
+  const amount = parseFloat(document.getElementById("price").value); // updated to match HTML
   const state = document.getElementById("state").value;
 
   if (isNaN(amount)) {
