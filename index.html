@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sales Tax Calculator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Sales Tax Calculator</h1>
+    <label for="state">Select your state:</label>
+    <select id="state">
+      <option value="">--Choose a state--</option>
+    </select>
+
+    <label for="price">Enter original price ($):</label>
+    <input type="number" id="price" placeholder="e.g. 100.00" />
+
+    <button onclick="calculateTax()">Calculate Final Price</button>
+
+    <div id="result"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
